@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>webgl</title>
+  </head>
+  <body>
+    <canvas id="glcanvas" width="768" height="768"></canvas>
+    <script type="module">
+      import { initShaderProgram, writeVertexAttrib, clear } from '../utils2.js'
+
+      // Vertex shader program
+      const vsSource = await fetch('./shader.vert').then(r => r.text())
+      const fsSource = await fetch('./shader.frag').then(r => r.text())
+
+      const $glcanvas = document.querySelector('#glcanvas')
+      // 初始化 WebGL 上下文
+      const gl = $glcanvas.getContext('webgl')
+      console.log(gl)
+
+      let shaderProgram = initShaderProgram(gl, vsSource, fsSource)
+      const numAttribs = gl.getProgramParameter(shaderProgram, gl.ACTIVE_ATTRIBUTES);
+
+      console.log(numAttribs)
+
+      writeVertexAttrib(
+        gl,
+        gl.getAttribLocation(shaderProgram, 'pos'),
+        new Float32Array([
+          -0.5, -0.5, 0.5, -0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, -0.5, 0.5,
+
+          -0.5, -0.5, -0.5, -0.5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, -0.5, -0.5
+        ]),
+        3
+      )
+
+      // 顶点索引数组
+      const indexes = new Uint8Array([
+        // 前四个点对应索引值
+        // gl.LINE_LOOP模式四个点绘制一个矩形框
+        0, 1, 2, 3,
+        // 后四个顶点对应索引值
+        // gl.LINE_LOOP模式四个点绘制一个矩形框
+        4, 5, 6, 7,
+        // 前后对应点对应索引值
+        // 两个点绘制一条直线
+        0, 4,
+        // 两个点绘制一条直线
+        1, 5,
+        // 两个点绘制一条直线
+        2, 6,
+        // 两个点绘制一条直线
+        3, 7
+      ])
+
+      const indexesBuffer = gl.createBuffer()
+      gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexesBuffer)
+      gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indexes, gl.STATIC_DRAW)
+
+      clear(gl)
+      gl.enable(gl.DEPTH_TEST)
+
+      gl.drawElements(gl.LINE_LOOP, 4, gl.UNSIGNED_BYTE, 0)
+      gl.drawElements(gl.LINE_LOOP, 4, gl.UNSIGNED_BYTE, 4)
+      gl.drawElements(gl.LINES, 8, gl.UNSIGNED_BYTE, 8)
+    </script>
+  </body>
+</html>

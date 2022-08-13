@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>webgl</title>
+  </head>
+  <body>
+    <canvas id="glcanvas" width="768" height="768"></canvas>
+    <script type="module">
+      import { createProgram, setAttribute } from '../common/utils.js'
+
+      // Vertex shader program
+      const vsSource = await fetch('./shader.vert').then(r => r.text())
+      const fsSource = await fetch('./shader.frag').then(r => r.text())
+
+      const $glcanvas = document.querySelector('#glcanvas')
+      // 初始化 WebGL 上下文
+      const gl = $glcanvas.getContext('webgl')
+
+      let program = createProgram(gl, vsSource, fsSource)
+
+      setAttribute(gl, program, {
+        name: 'a_f_position',
+        data: new Float32Array([
+          // 第一个点
+          -0.5, 0,
+          // 第二个点
+          0.5, 0,
+          // 第三个点
+          0, 0.5
+        ]),
+        size: 2,
+        normalized: false,
+        stride: 0,
+        offset: 0
+      })
+
+      // 清理画布
+      gl.clearColor(0, 0, 0, 1)
+      gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+
+      //开始绘制图形
+      gl.drawArrays(gl.TRIANGLES, 0, 3)
+    </script>
+  </body>
+</html>

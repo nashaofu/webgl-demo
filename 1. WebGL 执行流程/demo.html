@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WebGL</title>
+  </head>
+  <body>
+    <canvas id="canvas" width="768" height="768"></canvas>
+    <script type="module">
+      const $canvas = document.querySelector('#canvas')
+      // 初始化 WebGL 上下文
+      const gl = $canvas.getContext('webgl2')
+
+      const vsSource = await fetch('./shader.vert').then(r => r.text())
+
+      const vertexShader = gl.createShader(gl.VERTEX_SHADER)
+      gl.shaderSource(vertexShader, vsSource)
+      gl.compileShader(vertexShader)
+
+      const fsSource = await fetch('./shader.frag').then(r => r.text())
+      const fragmentShader = gl.createShader(gl.FRAGMENT_SHADER)
+      gl.shaderSource(fragmentShader, fsSource)
+      gl.compileShader(fragmentShader)
+
+      const shaderProgram = gl.createProgram()
+      gl.attachShader(shaderProgram, vertexShader)
+      gl.attachShader(shaderProgram, fragmentShader)
+      gl.linkProgram(shaderProgram)
+
+      // 使用 program
+      gl.useProgram(shaderProgram)
+
+      const aPositionLocation = gl.getAttribLocation(shaderProgram, 'a_position')
+      const buffer = gl.createBuffer()
+      gl.bindBuffer(gl.ARRAY_BUFFER, buffer)
+      gl.bufferData(
+        gl.ARRAY_BUFFER,
+        new Float32Array([
+          // 第一个点
+          -0.5, 0.0, 0.0,
+          // 第二个点
+          0.5, 0.0, 0.0
+        ]),
+        gl.STATIC_DRAW
+      )
+      gl.vertexAttribPointer(aPositionLocation, 3, gl.FLOAT, false, 0, 0)
+      gl.enableVertexAttribArray(aPositionLocation)
+
+      // 清理画布
+      gl.clearColor(0, 0, 0, 1)
+      gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+
+      //开始绘制图形
+      gl.drawArrays(gl.LINE_STRIP, 0, 2)
+    </script>
+  </body>
+</html>

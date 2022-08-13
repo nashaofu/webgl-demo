@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>webgl</title>
+  </head>
+  <body>
+    <canvas id="glcanvas" width="768" height="768"></canvas>
+    <div>实现一个球体经度的绘制，如果经度线数目为奇数，会存在一条从顶部连接到底部的线，懒得调整了</div>
+    <button id="btn">停止/开始转动</button>
+    <div>
+      <input type="range" id="lon" name="lon" min="3" max="90" value="30" step="1" />
+      <label for="lon">经度密度</label>
+    </div>
+    <div>
+      <input type="range" id="lat" name="lat" min="3" max="90" value="30" step="1" />
+      <label for="lat">纬度密度</label>
+    </div>
+
+    <script type="module">
+      import { initShaderProgram, writeVertexAttrib, clear } from '../utils2.js'
+      import Node, { writeVertexInfo } from '../node.js'
+
+      // Vertex shader program
+      const vsSource = await fetch('./shader.vert').then(res => res.text())
+      const fsSource = await fetch('./shader.frag').then(res => res.text())
+
+      const $glcanvas = document.querySelector('#glcanvas')
+      // 初始化 WebGL 上下文
+      const gl = $glcanvas.getContext('webgl')
+      let shaderProgram = initShaderProgram(gl, vsSource, fsSource)
+      let sunRotate = true
+
+      // 绘制一个球
+      function getBallPoints(lonCount, latCount, r) {
+        let points = []
+        let unitLonRad = (360 / lonCount / 180) * Math.PI
+        let unitLatRad = (180 / latCount / 180) * Math.PI
+
+        for (let lon = 0; lon < lonCount; lon++) {
+          for (let lat = 0; lat <= latCount; lat++) {
+            let latRad = lat * unitLatRad - Math.PI / 2
+            // 计算球上的坐标点
+            let x = Math.cos(latRad) * Math.cos(lon * unitLonRad)
+            let y = Math.sin(latRad)
+            let z = Math.cos(latRad) * Math.sin(lon * unitLonRad)
+            points[lon] = points[lon] ?? []
+            points[lon].push([x * r, y * r, z * r])
+          }
+        }
+
+        let tp = []
+
+        for (let i = 0; i < points.length; i++) {
+          let lonPoints = points[i]
+          let lonIndex = i + 1
+          if (lonIndex > points.length - 1) {
+            lonIndex = points.length - lonIndex
+          }
+          let nextLonPoints = points[lonIndex]
+          for (let j = 0; j < lonPoints.length; j++) {
+            let latIndex = j + 1
+            if (latIndex > lonPoints.length - 1) {
+              latIndex = lonPoints.length - latIndex
+            }
+
+            if (!nextLonPoints[latIndex]) {
+              console.log(i, j, latIndex)
+            }
+
+            tp.push([lonPoints[j], nextLonPoints[j], nextLonPoints[latIndex]])
+            tp.push([lonPoints[j], lonPoints[latIndex], nextLonPoints[latIndex]])
+          }
+        }
+
+        return tp.flat(3)
+      }
+
+      let lonCount = 30
+      let latCount = 30
+      let ballPoints = getBallPoints(lonCount, latCount, 0.8)
+      let ball = new Node({
+        shape: {
+          a_position_v3: {
+            data: ballPoints,
+            size: 3
+          },
+          a_normal_v3: {
+            data: ballPoints,
+            size: 3
+          },
+          u_4fv_color: { data: [1, 1, 0, 1] }
+        },
+        drawInfo: {
+          mode: gl.TRIANGLES,
+          count: ballPoints.length / 3,
+          offset: 0
+        },
+        transform: 'u_m4_transform'
+      })
+      gl.enable(gl.DEPTH_TEST)
+
+      function draw() {
+        clear(gl)
+
+        ball.render(gl, shaderProgram)
+        if (sunRotate) {
+          ball.rotate(0.1, 0.1, 0.1)
+        }
+        requestAnimationFrame(() => draw())
+      }
+
+      draw()
+
+      document.querySelector('#btn').addEventListener('click', () => {
+        sunRotate = !sunRotate
+      })
+
+      document.querySelector('#lon').addEventListener('change', e => {
+        lonCount = Number(e.target.value)
+        console.log(lonCount, latCount)
+        ballPoints = getBallPoints(lonCount, latCount, 0.8)
+        ball.setShape({
+          a_position_v3: {
+            data: ballPoints,
+            size: 3
+          },
+          a_normal_v3: {
+            data: ballPoints,
+            size: 3
+          },
+          u_4fv_color: { data: [1, 1, 0, 1] }
+        })
+
+        ball.setDrawInfo({
+          mode: gl.TRIANGLES,
+          count: ballPoints.length / 3,
+          offset: 0
+        })
+      })
+
+      document.querySelector('#lat').addEventListener('change', e => {
+        latCount = Number(e.target.value)
+        ballPoints = getBallPoints(lonCount, latCount, 0.8)
+        ball.setShape({
+          a_position_v3: {
+            data: ballPoints,
+            size: 3
+          },
+          a_normal_v3: {
+            data: ballPoints,
+            size: 3
+          },
+          u_4fv_color: { data: [1, 1, 0, 1] }
+        })
+
+        ball.setDrawInfo({
+          mode: gl.TRIANGLES,
+          count: ballPoints.length / 3,
+          offset: 0
+        })
+      })
+    </script>
+  </body>
+</html>

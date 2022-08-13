@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>webgl</title>
+  </head>
+  <body>
+    <canvas id="glcanvas" width="768" height="768"></canvas>
+    <div>
+      <button id="btn">太阳停止/开始转动</button>
+    </div>
+    <div>
+      <div>实现一个圆形的绘制，用多边形模拟圆形</div>
+      <input type="range" id="rad" name="rad" min="3" max="30" value="6" step="1" />
+      <label for="rad">调整太阳边数量</label>
+    </div>
+    <script type="module">
+      import { initShaderProgram, writeVertexAttrib, clear } from '../utils2.js'
+      import Node from '../node.js'
+
+      // Vertex shader program
+      const vsSource = await fetch('./shader.vert').then(res => res.text())
+      const fsSource = await fetch('./shader.frag').then(res => res.text())
+
+      const $glcanvas = document.querySelector('#glcanvas')
+      // 初始化 WebGL 上下文
+      const gl = $glcanvas.getContext('webgl')
+      let shaderProgram = initShaderProgram(gl, vsSource, fsSource)
+
+      // 绘制一个圆
+      function getCirclePoints(count, r) {
+        let points = []
+        // 多边形模拟圆形
+        for (let i = 0; i <= count; i++) {
+          const angle = (i * 360) / count
+          // 计算圆上的坐标点
+          let x = Math.cos((angle * Math.PI) / 180)
+          let y = Math.sin((angle * Math.PI) / 180)
+          points.push([x * r, y * r, 0])
+        }
+
+        let tp = []
+        for (let i = 0; i < points.length; i += 1) {
+          tp.push(...points[i])
+          tp.push(0, 0, 0)
+          let index = i + 1
+          if (index > points.length - 1) {
+            index = 0
+          }
+          tp.push(...points[index])
+        }
+        return tp
+      }
+
+      const sunPoints = getCirclePoints(6, 0.2)
+      let sun = new Node({
+        shape: {
+          a_position_v3: {
+            data: sunPoints,
+            size: 3
+          },
+          u_4fv_color: { data: [1, 1, 0, 1] }
+        },
+        drawInfo: {
+          mode: gl.TRIANGLES,
+          count: sunPoints.length / 3,
+          offset: 0
+        },
+        transform: 'u_m4_transform'
+      })
+
+      const earthPoints = getCirclePoints(10, 0.1)
+      const earth = new Node({
+        shape: {
+          a_position_v3: {
+            data: earthPoints,
+            size: 3
+          },
+          u_4fv_color: { data: [0, 0.2, 1, 1] }
+        },
+        drawInfo: {
+          mode: gl.TRIANGLES,
+          count: earthPoints.length / 3,
+          offset: 0
+        },
+        transform: 'u_m4_transform'
+      })
+
+      const moonPoints = getCirclePoints(10, 0.03)
+      const moon = new Node({
+        shape: {
+          a_position_v3: {
+            data: moonPoints,
+            size: 3
+          },
+          u_4fv_color: { data: [1, 1, 1, 1] }
+        },
+        drawInfo: {
+          mode: gl.TRIANGLES,
+          count: moonPoints.length / 3,
+          offset: 0
+        },
+        transform: 'u_m4_transform'
+      })
+
+      sun.addChild(earth)
+      earth.translation(0.7, 0, 0)
+      earth.addChild(moon)
+      moon.translation(0.2, 0, 0)
+
+      let sunRotate = true
+
+      function draw() {
+        clear(gl)
+        sun.render(gl, shaderProgram)
+        if (sunRotate) {
+          sun.rotate(0, 0, 0.05)
+        }
+        earth.rotate(0, 0, 1)
+        moon.rotate(0, 0, 3)
+        requestAnimationFrame(draw)
+      }
+
+      draw()
+
+      document.querySelector('#btn').addEventListener('click', () => {
+        sunRotate = !sunRotate
+      })
+
+      document.querySelector('#rad').addEventListener('change', e => {
+        let sunPoints = getCirclePoints(Number(e.target.value), 0.2)
+        sun.setShape({
+          a_position_v3: {
+            data: sunPoints,
+            size: 3
+          },
+          u_4fv_color: { data: [1, 1, 0, 1] }
+        })
+
+        sun.setDrawInfo({
+          mode: gl.TRIANGLES,
+          count: sunPoints.length / 3,
+          offset: 0
+        })
+      })
+    </script>
+  </body>
+</html>

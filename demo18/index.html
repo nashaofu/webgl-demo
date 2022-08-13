@@ -1,0 +1,111 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>My first three.js app</title>
+    <style>
+      body {
+        margin: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <script src="https://threejs.org/build/three.js"></script>
+    <script>
+      let camera, scene, renderer
+
+      let mesh
+      const amount = parseInt(window.location.search.slice(1)) || 2
+      const count = Math.pow(amount, 3)
+
+      const raycaster = new THREE.Raycaster()
+      const mouse = new THREE.Vector2(1, 1)
+
+      const color = new THREE.Color()
+      const white = new THREE.Color().setHex(0xffffff)
+
+      init()
+      animate()
+
+      function init() {
+        camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 100)
+        camera.position.set(amount, amount, amount)
+        camera.lookAt(0, 0, 0)
+
+        scene = new THREE.Scene()
+
+        const light = new THREE.HemisphereLight(0xffffff, 0x888888)
+        light.position.set(0, 1, 0)
+        scene.add(light)
+
+        const geometry = new THREE.IcosahedronGeometry(0.5, 3)
+        const material = new THREE.MeshPhongMaterial({ color: 0xffffff })
+
+        mesh = new THREE.InstancedMesh(geometry, material, count)
+
+        let i = 0
+        const offset = (amount - 1) / 2
+
+        const matrix = new THREE.Matrix4()
+
+        for (let x = 0; x < amount; x++) {
+          for (let y = 0; y < amount; y++) {
+            for (let z = 0; z < amount; z++) {
+              matrix.setPosition(offset - x, offset - y, offset - z)
+
+              mesh.setMatrixAt(i, matrix)
+              mesh.setColorAt(i, color)
+
+              i++
+            }
+          }
+        }
+
+        scene.add(mesh)
+
+        renderer = new THREE.WebGLRenderer({ antialias: true })
+        renderer.setPixelRatio(window.devicePixelRatio)
+        renderer.setSize(window.innerWidth, window.innerHeight)
+        document.body.appendChild(renderer.domElement)
+
+        window.addEventListener('resize', onWindowResize)
+        document.addEventListener('click', onClick)
+      }
+
+      function onWindowResize() {
+        camera.aspect = window.innerWidth / window.innerHeight
+        camera.updateProjectionMatrix()
+
+        renderer.setSize(window.innerWidth, window.innerHeight)
+      }
+
+      function onClick(event) {
+        event.preventDefault()
+
+        mouse.x = (event.clientX / window.innerWidth) * 2 - 1
+        mouse.y = -(event.clientY / window.innerHeight) * 2 + 1
+
+        raycaster.setFromCamera(mouse, camera)
+
+        const intersection = raycaster.intersectObject(mesh)
+
+        if (intersection.length > 0) {
+          const instanceId = intersection[0].instanceId
+
+          mesh.getColorAt(instanceId, color)
+
+          if (color.equals(white)) {
+            mesh.setColorAt(instanceId, color.setHex(Math.random() * 0xffffff))
+
+            mesh.instanceColor.needsUpdate = true
+          }
+        }
+      }
+
+      function animate() {
+        requestAnimationFrame(animate)
+
+        renderer.render(scene, camera)
+      }
+    </script>
+  </body>
+</html>

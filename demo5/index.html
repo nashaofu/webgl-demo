@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>webgl</title>
+  </head>
+  <body>
+    <canvas id="glcanvas" width="768" height="768"></canvas>
+    <script type="module">
+      import { initShaderProgram, writeVertexAttrib, clear } from '../utils2.js'
+
+      // Vertex shader program
+      const vsSource = await fetch('./shader.vert').then(r => r.text())
+      const fsSource = await fetch('./shader.frag').then(r => r.text())
+
+      const $glcanvas = document.querySelector('#glcanvas')
+      // 初始化 WebGL 上下文
+      const gl = $glcanvas.getContext('webgl')
+
+      let shaderProgram = initShaderProgram(gl, vsSource, fsSource)
+
+      // 顶点索引数组
+      const indexes = new Uint8Array([
+        // 绘制立方体四个侧面
+        // 绘制一个面
+        0, 1, 2, 0, 2, 3,
+
+        3, 2, 6, 3, 6, 7,
+
+        7, 6, 5, 7, 5, 4,
+
+        4, 5, 1, 4, 1, 0,
+
+        // 绘制顶面和底面
+        0, 4, 7, 0, 7, 3,
+
+        1, 5, 6, 1, 6, 2
+      ])
+
+      writeVertexAttrib(
+        gl,
+        gl.getAttribLocation(shaderProgram, 'pos'),
+        new Float32Array([
+          -0.5, -0.5, 0.5, -0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, -0.5, 0.5,
+
+          -0.5, -0.5, -0.5, -0.5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, -0.5, -0.5
+        ]),
+        3
+      )
+
+      writeVertexAttrib(
+        gl,
+        gl.getAttribLocation(shaderProgram, 'color'),
+        new Float32Array([
+          1.0, 0.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0, 1.0, 0.0, 1.0, 0.0,
+
+          0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0
+        ]),
+        3
+      )
+
+      // 创建缓冲区对象
+      const indexesBuffer = gl.createBuffer()
+      gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexesBuffer)
+      gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indexes, gl.STATIC_DRAW)
+
+      clear(gl)
+
+      gl.enable(gl.DEPTH_TEST)
+      //开始绘制图形
+      gl.drawElements(gl.TRIANGLES, 36, gl.UNSIGNED_BYTE, 0)
+    </script>
+  </body>
+</html>

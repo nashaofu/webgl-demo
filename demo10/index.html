@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>webgl</title>
+  </head>
+  <body>
+    <canvas id="glcanvas" width="768" height="768"></canvas>
+    <script type="module">
+      import { initShaderProgram, writeVertexAttrib, clear } from '../utils2.js'
+
+      // Vertex shader program
+      const vsSource = await fetch('./shader.vert').then(res => res.text())
+      const fsSource = await fetch('./shader.frag').then(res => res.text())
+
+      const $glcanvas = document.querySelector('#glcanvas')
+      // 初始化 WebGL 上下文
+      const gl = $glcanvas.getContext('webgl')
+
+      let shaderProgram = initShaderProgram(gl, vsSource, fsSource)
+
+      writeVertexAttrib(
+        gl,
+        gl.getAttribLocation(shaderProgram, 'a_position'),
+        new Float32Array([-300, 0, 0, 400, 300, 0]),
+        2,
+        0,
+        0
+      )
+
+      const resolutionUniformLocation = gl.getUniformLocation(shaderProgram, 'u_resolution')
+      gl.uniform2fv(resolutionUniformLocation, new Float32Array([gl.canvas.width, gl.canvas.height]))
+
+      gl.viewport(0, 0, gl.canvas.width, gl.canvas.height)
+      clear(gl)
+
+      gl.drawArrays(gl.TRIANGLES, 0, 3)
+    </script>
+  </body>
+</html>

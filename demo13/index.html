@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>webgl</title>
+  </head>
+  <body>
+    <canvas id="glcanvas" width="768" height="768"></canvas>
+    <div>webgl纹理坐标原点为图片左下角，向右为x正方形，向上为y轴正方向</div>
+    <script type="module">
+      import { initShaderProgram, writeVertexAttrib, clear } from '../utils2.js'
+
+      // Vertex shader program
+      const vsSource = await fetch('./shader.vert').then(res => res.text())
+      const fsSource = await fetch('./shader.frag').then(res => res.text())
+
+      const $glcanvas = document.querySelector('#glcanvas')
+      // 初始化 WebGL 上下文
+      const gl = $glcanvas.getContext('webgl')
+
+      console.log(gl)
+
+      let shaderProgram = initShaderProgram(gl, vsSource, fsSource)
+
+      const positionLocation = gl.getAttribLocation(shaderProgram, 'a_position')
+
+      const positionBuffer = gl.createBuffer()
+      gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer)
+      gl.bufferData(
+        gl.ARRAY_BUFFER,
+        new Float32Array([-0.5, -0.5, 0.5, -0.5, -0.5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5]),
+        gl.STATIC_DRAW
+      )
+      gl.enableVertexAttribArray(positionBuffer)
+      gl.vertexAttribPointer(positionBuffer, 2, gl.FLOAT, false, 0, 0)
+
+      // 找到纹理的地址
+      const texCoordLocation = gl.getAttribLocation(shaderProgram, 'a_texCoord')
+
+      // 给矩形提供纹理坐标
+      const texCoordBuffer = gl.createBuffer()
+      gl.bindBuffer(gl.ARRAY_BUFFER, texCoordBuffer)
+      gl.bufferData(
+        gl.ARRAY_BUFFER,
+        new Float32Array([0.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 0.0]),
+        gl.STATIC_DRAW
+      )
+      gl.enableVertexAttribArray(texCoordLocation)
+      gl.vertexAttribPointer(texCoordLocation, 2, gl.FLOAT, false, 0, 0)
+
+      // 创建纹理
+      const texture = gl.createTexture()
+      gl.bindTexture(gl.TEXTURE_2D, texture)
+
+      // 设置参数，让我们可以绘制任何尺寸的图像
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
+
+      const image = new Image()
+
+      image.src = './qrcode.png'
+
+      image.addEventListener('load', () => {
+        // 将图像上传到纹理
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image)
+        draw()
+      })
+
+      function draw() {
+        clear(gl)
+
+        gl.drawArrays(gl.TRIANGLES, 0, 6)
+      }
+
+      draw()
+    </script>
+  </body>
+</html>
