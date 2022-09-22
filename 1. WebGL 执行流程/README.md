@@ -25,39 +25,39 @@ const gl = $canvas.getContext('webgl2')
 
 - 编译顶点着色器
 
-  ```js
-  // 创建 vertex shader
-  const vertexShader = gl.createShader(gl.VERTEX_SHADER)
-  const vsSource = `
-  // attribute 声明 vec4 类型变量 a_position
-  // vec4 前三个值为点的 x,y,z 坐标
-  attribute vec4 a_position;
+```js
+// 创建 vertex shader
+const vertexShader = gl.createShader(gl.VERTEX_SHADER)
+const vsSource = `
+// attribute 声明 vec4 类型变量 a_position
+// vec4 前三个值为点的 x,y,z 坐标
+attribute vec4 a_position;
 
-  void main() {
-    // 顶点坐标 a_position 赋值给内置变量 gl_Position
-    // 逐顶点处理数据
-    gl_Position = a_position;
-  }`
+void main() {
+  // 顶点坐标 a_position 赋值给内置变量 gl_Position
+  // 逐顶点处理数据
+  gl_Position = a_position;
+}`
 
-  gl.shaderSource(vertexShader, vsSource)
-  // 编译顶点着色器
-  gl.compileShader(vertexShader)
-  ```
+gl.shaderSource(vertexShader, vsSource)
+// 编译顶点着色器
+gl.compileShader(vertexShader)
+```
 
 - 编译片段着色器
 
-  ```js
-  // 创建 fragment shader
-  const fragmentShader = gl.createShader(gl.FRAGMENT_SHADER)
-  const fsSource = `
-  void main() {
-    gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
-  }`
+```js
+// 创建 fragment shader
+const fragmentShader = gl.createShader(gl.FRAGMENT_SHADER)
+const fsSource = `
+void main() {
+  gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+}`
 
-  gl.shaderSource(fragmentShader, fsSource)
-  // 编译片段着色器
-  gl.compileShader(fragmentShader)
-  ```
+gl.shaderSource(fragmentShader, fsSource)
+// 编译片段着色器
+gl.compileShader(fragmentShader)
+```
 
 ### 创建着色器程序
 

@@ -53,9 +53,14 @@ export function createProgram(gl: WebGL2RenderingContext, vsSource: string, fsSo
 }
 
 export interface Attribute {
+  // 变量标识
   name: string
+  // 待写入缓冲的数据
   data: ArrayBufferView
+  // 指定每个顶点属性的组成数量，必须是 1，2，3 或 4
+  // 参考 MDN 中 vertexAttribPointer 方法
   size: 1 | 2 | 3 | 4
+  // normalized stride offset 参考 MDN 中 vertexAttribPointer 方法
   normalized?: boolean
   stride?: number
   offset?: number
