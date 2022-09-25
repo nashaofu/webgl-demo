@@ -62,12 +62,14 @@ setAttribute(gl, program, {
 
 ```js
 function draw() {
+  let sin = Math.sin(zRad)
+  let cos = Math.cos(zRad)
   setUniform(gl, program, {
-    name: 'u_m4fv_transform_z',
+    name: 'u_m4fv_transform_z'
     data: [
       // 绕 Z 轴旋转矩阵
-      Math.cos(zRad), Math.sin(zRad), 0 ,0,
-      -Math.sin(zRad), Math.cos(zRad), 0, 0,
+      cos, sin, 0 ,0,
+      -sin, cos, 0, 0,
       0, 0, 1, 0,
       0, 0, 0, 1
     ]
@@ -83,11 +85,29 @@ function draw() {
 }
 ```
 
-三维旋转矩阵可参考：https://medium.com/swlh/understanding-3d-matrix-transforms-with-pixijs-c76da3f8bd8。
+三维矩阵变换公式如下：
 
-![z 轴旋转矩阵](./rotateZmatrix.png)
+- 平移
 
-我们可以看到，我们实际书写的旋转矩阵与上图中的有一些区别，这是因为 WebGL 中的矩阵与数学上的矩阵不一样，WebGL 为了方便计算，把矩阵进行了转置，详情可参考：https://webglfundamentals.org/webgl/lessons/zh_cn/webgl-matrix-vs-math.html
+![平移](./translation-matrix.svg)
+
+- 缩放
+
+![缩放](./scaling-matrix.svg)
+
+- 绕 x 轴旋转
+
+![绕 x 轴旋转](./rotation-x-matrix.svg)
+
+- 绕 y 轴旋转
+
+![绕 y 轴旋转](./rotation-y-matrix.svg)
+
+- 绕 z 轴旋转
+
+![绕 z 轴旋转](./rotation-z-matrix.svg)
+
+我们可以看到，我们实际书写的旋转矩阵与上图中的有一些区别，这是因为 WebGL 中的矩阵与数学上的矩阵不一样，WebGL 为了方便计算，把矩阵进行了转置，详情可参考：[https://webglfundamentals.org/webgl/lessons/zh_cn/webgl-matrix-vs-math.html](https://webglfundamentals.org/webgl/lessons/zh_cn/webgl-matrix-vs-math.html)
 
 ## 示例效果
 

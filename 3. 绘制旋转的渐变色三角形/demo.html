@@ -62,12 +62,14 @@
       let zRad = 0
 
       function draw() {
+        let sin = Math.sin(zRad)
+        let cos = Math.cos(zRad)
         setUniform(gl, program, {
           name: 'u_m4fv_transform_z',
           data: [
             // 绕 Z 轴旋转矩阵
-            Math.cos(zRad), Math.sin(zRad), 0 ,0,
-            -Math.sin(zRad), Math.cos(zRad), 0, 0,
+            cos, sin, 0 ,0,
+            -sin, cos, 0, 0,
             0, 0, 1, 0,
             0, 0, 0, 1
           ]
