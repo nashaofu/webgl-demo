@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>webgl</title>
+  </head>
+  <body>
+    <canvas id="glcanvas" width="768" height="768"></canvas>
+    <div>
+      绕 y 轴旋转角度
+      <input type="range" id="zRad" min="0" max="360" value="0" step="1" />
+    </div>
+    <script type="module">
+      import { createProgram, setAttribute, setUniform } from '../common/utils.js'
+
+      const $glcanvas = document.querySelector('#glcanvas')
+      // 初始化 WebGL 上下文
+      const gl = $glcanvas.getContext('webgl')
+
+      // Vertex shader program
+      const vsSource = await fetch('./shader.vert').then(r => r.text())
+      const fsSource = await fetch('./shader.frag').then(r => r.text())
+
+      let program = createProgram(gl, vsSource, fsSource)
+
+      setAttribute(gl, program, {
+        name: 'a_f_position',
+        data: new Float32Array([
+          // 前面正方形坐标
+          -0.5, -0.5, -0.5,
+          -0.5, 0.5, -0.5,
+          0.5, 0.5, -0.5,
+          0.5, -0.5, -0.5,
+
+          // 后面正方形坐标
+          -0.5, -0.5, 0.5,
+          -0.5, 0.5, 0.5,
+          0.5, 0.5, 0.5,
+          0.5, -0.5, 0.5
+        ]),
+        size: 3,
+        normalized: false,
+        stride: 0,
+        offset: 0
+      })
+
+      setAttribute(gl, program, {
+        name: 'a_f_color',
+        data: new Float32Array([
+          // 前面正方形
+          1, 0, 0,
+          1, 0, 0,
+          1, 0, 0,
+          1, 0, 0,
+
+          // 后面正方形
+          0, 0, 1,
+          0, 0, 1,
+          0, 0, 1,
+          0, 0, 1
+        ]),
+        size: 3,
+        normalized: false,
+        stride: 0,
+        offset: 0
+      })
+
+      // 顶点索引数组
+      const indexes = new Uint8Array([
+        // 前后两个正方形
+        0, 1, 2, 3,
+        4, 5, 6, 7,
+
+        // 连接前后两个面
+        0, 4,
+        1, 5,
+        2, 6,
+        3, 7
+      ])
+
+      // 创建缓冲区对象
+      const indexesBuffer = gl.createBuffer()
+      gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexesBuffer)
+      gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indexes, gl.STATIC_DRAW)
+
+      let yRad = 0
+
+      function draw() {
+        let sin = Math.sin(yRad);
+        let cos = Math.cos(yRad);
+        setUniform(gl, program, {
+          name: 'u_m4fv_transform_y',
+          data: [
+            // 绕 y 轴旋转矩阵
+            cos, 0, sin ,0,
+            0, 1, 0, 0,
+            -sin, 0, cos, 0,
+            0, 0, 0, 1
+          ]
+        })
+        // 清理画布
+        gl.clearColor(0, 0, 0, 1)
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+        gl.enable(gl.DEPTH_TEST)
+
+        //开始绘制图形
+        gl.drawElements(gl.LINE_LOOP, 4, gl.UNSIGNED_BYTE, 0)
+        gl.drawElements(gl.LINE_LOOP, 4, gl.UNSIGNED_BYTE, 4)
+        gl.drawElements(gl.LINES, 8, gl.UNSIGNED_BYTE, 8)
+
+        requestAnimationFrame(draw)
+      }
+
+      document.querySelector('#zRad').addEventListener('input', (e) => {
+        yRad = Number(e.target.value) / 180 * Math.PI;
+      })
+
+      draw()
+    </script>
+  </body>
+</html>

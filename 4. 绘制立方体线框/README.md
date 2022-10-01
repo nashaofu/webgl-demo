@@ -164,7 +164,7 @@ function draw() {
 修改代码，传入 x 旋转角度到着色器中，让 x 轴旋转角度也能动态修改。顶点着色器伪代码如下：
 
 ```glsl
-// 旋转角度 1radian 从 js 中写入过来
+// 旋转角度 radian 从 js 中写入过来
 float cos = cos(radian);
 float sin = sin(radian);
 mat4 rotationXMatrix = mat4(
