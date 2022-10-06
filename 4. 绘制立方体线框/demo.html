@@ -10,7 +10,7 @@
     <canvas id="glcanvas" width="768" height="768"></canvas>
     <div>
       绕 y 轴旋转角度
-      <input type="range" id="zRad" min="0" max="360" value="0" step="1" />
+      <input type="range" id="yRad" min="0" max="360" value="0" step="1" />
     </div>
     <script type="module">
       import { createProgram, setAttribute, setUniform } from '../common/utils.js'
@@ -123,7 +123,7 @@
         requestAnimationFrame(draw)
       }
 
-      document.querySelector('#zRad').addEventListener('input', (e) => {
+      document.querySelector('#yRad').addEventListener('input', (e) => {
         yRad = Number(e.target.value) / 180 * Math.PI;
       })
 

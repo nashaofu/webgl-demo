@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>webgl</title>
+  </head>
+  <body>
+    <canvas id="glcanvas" width="768" height="768"></canvas>
+    <div>
+      绕 x 轴旋转角度
+      <input type="range" id="xRad" min="0" max="360" value="0" step="1" />
+    </div>
+    <div>
+      绕 y 轴旋转角度
+      <input type="range" id="yRad" min="0" max="360" value="0" step="1" />
+    </div>
+    <script type="module">
+      import { createProgram, setAttribute, setUniform } from '../common/utils.js'
+
+      // Vertex shader program
+      const vsSource = await fetch('./shader.vert').then(r => r.text())
+      const fsSource = await fetch('./shader.frag').then(r => r.text())
+
+      const $glcanvas = document.querySelector('#glcanvas')
+      // 初始化 WebGL 上下文
+      const gl = $glcanvas.getContext('webgl')
+
+      const program = createProgram(gl, vsSource, fsSource)
+
+      setAttribute(gl, program, {
+        name: 'a_f_position',
+        // 立方体各个面的顶点
+        data: new Float32Array([
+          // 前面
+          -0.5, -0.5, 0.5,
+          0.5, -0.5, 0.5,
+          0.5, 0.5, 0.5,
+          -0.5, 0.5, 0.5,
+          -0.5, -0.5, 0.5,
+          0.5, 0.5, 0.5,
+
+          // 后面
+          -0.5, -0.5, -0.5,
+          -0.5, 0.5, -0.5,
+          0.5, 0.5, -0.5,
+          0.5, -0.5, -0.5,
+          -0.5, -0.5, -0.5,
+          0.5, 0.5, -0.5,
+
+          // 顶部
+          -0.5, 0.5, -0.5,
+          -0.5, 0.5, 0.5,
+          0.5, 0.5, 0.5,
+          0.5, 0.5, -0.5,
+          -0.5, 0.5, -0.5,
+          0.5, 0.5, 0.5,
+
+          // 底部
+          -0.5, -0.5, -0.5,
+          0.5, -0.5, -0.5,
+          0.5, -0.5, 0.5,
+          -0.5, -0.5, 0.5,
+          -0.5, -0.5, -0.5,
+          0.5, -0.5, 0.5,
+
+          // 右侧
+          0.5, -0.5, -0.5,
+          0.5, 0.5, -0.5,
+          0.5, 0.5, 0.5,
+          0.5, -0.5, 0.5,
+          0.5, -0.5, -0.5,
+          0.5, 0.5, 0.5,
+
+          // 左侧
+          -0.5, -0.5, -0.5,
+          -0.5, -0.5, 0.5,
+          -0.5, 0.5, 0.5,
+          -0.5, 0.5, -0.5,
+          -0.5, -0.5, -0.5,
+          -0.5, 0.5, 0.5,
+        ]),
+        size: 3
+      })
+
+      const faceColors = [
+        [1.0, 1.0, 1.0, 1.0], // 前面颜色
+        [1.0, 0.0, 0.0, 1.0], // 后面颜色
+        [0.0, 1.0, 0.0, 1.0], // 顶部颜色
+        [0.0, 0.0, 1.0, 1.0], // 底部颜色
+        [1.0, 1.0, 0.0, 1.0], // 右侧颜色
+        [1.0, 0.0, 1.0, 1.0]  // 左侧颜色
+      ]
+
+      const colors = []
+
+      for (let j = 0; j < faceColors.length; ++j) {
+        const c = faceColors[j]
+        // 每个面 6 个顶点
+        for (let i =0;i<6;i++) {
+          colors.push(...c)
+        }
+      }
+
+      setAttribute(gl, program, {
+        name: 'a_f_color',
+        data: new Float32Array(colors),
+        size: 4
+      })
+
+      let xRad = 0
+      let yRad = 0
+
+      function draw() {
+        let xSin = Math.sin(xRad);
+        let xCos = Math.cos(xRad);
+        setUniform(gl, program, {
+          name: 'u_m4fv_transform_x',
+          data: [
+            // 绕 x 轴旋转矩阵
+            1, 0, 0 ,0,
+            0, xCos, xSin, 0,
+            0, -xSin, xCos, 0,
+            0, 0, 0, 1
+          ]
+        })
+
+        let ySin = Math.sin(yRad);
+        let yCos = Math.cos(yRad);
+        setUniform(gl, program, {
+          name: 'u_m4fv_transform_y',
+          data: [
+            // 绕 y 轴旋转矩阵
+            yCos, 0, ySin ,0,
+            0, 1, 0, 0,
+            -ySin, 0, yCos, 0,
+            0, 0, 0, 1
+          ]
+        })
+
+        // 清理画布
+        gl.clearColor(0, 0, 0, 1)
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+        gl.enable(gl.DEPTH_TEST)
+
+        //开始绘制图形
+        gl.drawArrays(gl.TRIANGLES, 0, 36)
+
+        requestAnimationFrame(draw)
+      }
+
+      document.querySelector('#xRad').addEventListener('input', (e) => {
+        xRad = Number(e.target.value) / 180 * Math.PI;
+      })
+
+      document.querySelector('#yRad').addEventListener('input', (e) => {
+        yRad = Number(e.target.value) / 180 * Math.PI;
+      })
+
+      draw()
+    </script>
+  </body>
+</html>
