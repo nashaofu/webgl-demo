@@ -8,9 +8,12 @@
   </head>
   <body>
     <canvas id="glcanvas" width="768" height="768"></canvas>
-    <button id="rotate">开始旋转/停止旋转</button>
+    <div>
+      <button id="rotate">开始旋转/停止旋转</button>
+    </div>
+
     <script type="module">
-      import { initShaderProgram, writeVertexAttrib, clear } from '../utils2.js'
+      import { createProgram, setAttribute } from '../common/utils.js'
 
       // Vertex shader program
       const vsSource = await fetch('./shader.vert').then(res => res.text())
@@ -20,33 +23,21 @@
       // 初始化 WebGL 上下文
       const gl = $glcanvas.getContext('webgl')
 
-      let shaderProgram = initShaderProgram(gl, vsSource, fsSource)
+      let program = createProgram(gl, vsSource, fsSource)
 
-      writeVertexAttrib(
-        gl,
-        gl.getAttribLocation(shaderProgram, 'pos'),
-        new Float32Array([
+      setAttribute(gl, program, {
+        name: 'a_f_postion',
+        data: new Float32Array([
           -0.5, -0.5, 0.5, -0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, -0.5, 0.5,
 
           -0.5, -0.5, -0.5, -0.5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5, -0.5, -0.5
         ]),
-        3
-      )
+        size: 3
+      })
 
-      writeVertexAttrib(
-        gl,
-        gl.getAttribLocation(shaderProgram, 'color'),
-        new Float32Array([
-          1.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
-          1.0, 0.0
-        ]),
-        3
-      )
-
-      writeVertexAttrib(
-        gl,
-        gl.getAttribLocation(shaderProgram, 'normal'),
-        new Float32Array([
+      setAttribute(gl, program, {
+        name: 'a_f_normal',
+        data: new Float32Array([
           // 前面法向量
           0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0,
 
@@ -65,8 +56,8 @@
           // 顶部
           0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0
         ]),
-        3
-      )
+        size: 3
+      })
 
       // 顶点索引数组
       const indexes = new Uint8Array([
@@ -90,23 +81,26 @@
       const indexesBuffer = gl.createBuffer()
       gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexesBuffer)
       gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indexes, gl.STATIC_DRAW)
+
       gl.enable(gl.DEPTH_TEST)
 
       let r = 0
       let step = 0
       function draw() {
-        writeVertexAttrib(
-          gl,
-          gl.getAttribLocation(shaderProgram, 'angle'),
-          new Float32Array(Array(16).fill(r / 360)),
-          2
-        )
+        setAttribute(gl, program, {
+          name: 'a_f_angle',
+          data: new Float32Array(Array(16).fill(r / 360)),
+          size: 2
+        })
+
         r += step
         if (r > 360) {
           r -= 360
         }
 
-        clear(gl, [1, 1, 1, 1])
+        // 清理画布
+        gl.clearColor(1, 1, 1, 1)
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
         //开始绘制图形
         gl.drawElements(gl.TRIANGLES, 36, gl.UNSIGNED_BYTE, 0)
         requestAnimationFrame(draw)
