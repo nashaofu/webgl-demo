@@ -5,13 +5,29 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>webgl</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+      }
+
+      #glcanvas {
+        display: block;
+        width: 100%;
+        height: 100%;
+      }
+    </style>
   </head>
   <body>
-    <canvas id="glcanvas" width="768" height="768"></canvas>
+    <canvas id="glcanvas"></canvas>
     <script type="module">
       import { createProgram, setAttribute } from '../common/utils.js'
 
       const $glcanvas = document.querySelector('#glcanvas')
+
       // 初始化 WebGL 上下文
       const gl = $glcanvas.getContext('webgl')
 
@@ -23,26 +39,41 @@
 
       setAttribute(gl, program, {
         name: 'a_f_position',
-        // 三角形的顶点坐标
+        // 正方形的顶点坐标
         data: new Float32Array([
           // 第一个点
-          -0.5, 0,
+          -0.5, -0.5,
           // 第二个点
-          0.5, 0,
+          -0.5, 0.5,
           // 第三个点
-          0, 0.5
+          0.5, 0.5,
+          // 第四个点
+          0.5, -0.5
         ]),
         size: 2,
         normalized: false,
         stride: 0,
         offset: 0
       })
-      // 清理画布
-      gl.clearColor(0, 0, 0, 1)
-      gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
-      // 开始绘制图形
-      gl.drawArrays(gl.TRIANGLES, 0, 3)
+      function draw() {
+        if ($glcanvas.width !== $glcanvas.clientWidth || $glcanvas.height !== $glcanvas.clientHeight) {
+          $glcanvas.width = $glcanvas.clientWidth
+          $glcanvas.height = $glcanvas.clientHeight
+          gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight)
+        }
+
+        // 清理画布
+        gl.clearColor(0, 0, 0, 1)
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+
+        // 开始绘制图形
+        gl.drawArrays(gl.LINE_LOOP, 0, 4)
+
+        requestAnimationFrame(draw)
+      }
+
+      draw()
     </script>
   </body>
 </html>

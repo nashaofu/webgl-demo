@@ -1,3 +1,6 @@
+//
+// 创建指定类型的着色器，上传 source 源码并编译
+//
 export function loadShader(gl, type, source) {
     const shader = gl.createShader(type);
     if (!shader) {
@@ -16,6 +19,8 @@ export function loadShader(gl, type, source) {
     }
     return shader;
 }
+//
+//  初始化着色器程序，让 WebGL 知道如何绘制我们的数据
 export function initShaderProgram(gl, vsSource, fsSource) {
     const vertexShader = loadShader(gl, gl.VERTEX_SHADER, vsSource);
     const fragmentShader = loadShader(gl, gl.FRAGMENT_SHADER, fsSource);
@@ -23,32 +28,37 @@ export function initShaderProgram(gl, vsSource, fsSource) {
         return null;
     }
     // 创建着色器程序
-    const program = gl.createProgram();
-    if (!program) {
+    const shaderProgram = gl.createProgram();
+    if (!shaderProgram) {
         console.error('createProgram fail');
         return null;
     }
-    gl.attachShader(program, vertexShader);
-    gl.attachShader(program, fragmentShader);
-    gl.linkProgram(program);
-    // 创建失败
-    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-        console.error('Unable to initialize the shader program: ' + gl.getProgramInfoLog(program));
+    gl.attachShader(shaderProgram, vertexShader);
+    gl.attachShader(shaderProgram, fragmentShader);
+    gl.linkProgram(shaderProgram);
+    //使用program
+    gl.useProgram(shaderProgram);
+    // 创建失败， alert
+    if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
+        console.error('Unable to initialize the shader program: ' + gl.getProgramInfoLog(shaderProgram));
         return null;
     }
-    //使用program
-    gl.useProgram(program);
-    return program;
+    return shaderProgram;
 }
-export function writeVertexAttrib(gl, index, data, size, normalized = false, stride = 0, offset = 0) {
-    gl.enableVertexAttribArray(index);
+export function writeVertexAttrib(gl, attribLocation, data, size, offset = 0, length = 0) {
+    gl.enableVertexAttribArray(attribLocation);
     const buffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
     gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
-    gl.vertexAttribPointer(index, size, gl.FLOAT, normalized, stride, offset);
+    gl.vertexAttribPointer(attribLocation, size, gl.FLOAT, false, offset, length);
 }
 export function clear(gl, color = [0, 0, 0, 1]) {
-    // 清理画布
+    // Clear to black, fully opaque
     gl.clearColor(...color);
+    // Clear everything
+    gl.clearDepth(1.0);
+    gl.depthFunc(gl.LEQUAL);
+    // Near things obscure far things
+    // Clear the canvas before we start drawing on it.
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 }
