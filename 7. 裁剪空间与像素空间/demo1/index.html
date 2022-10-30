@@ -24,10 +24,9 @@
   <body>
     <canvas id="glcanvas"></canvas>
     <script type="module">
-      import { createProgram, setAttribute } from '../common/utils.js'
+      import { createProgram, setAttribute } from '../../common/utils.js'
 
       const $glcanvas = document.querySelector('#glcanvas')
-
       // 初始化 WebGL 上下文
       const gl = $glcanvas.getContext('webgl')
 
@@ -57,20 +56,12 @@
       })
 
       function draw() {
-        if ($glcanvas.width !== $glcanvas.clientWidth || $glcanvas.height !== $glcanvas.clientHeight) {
-          $glcanvas.width = $glcanvas.clientWidth
-          $glcanvas.height = $glcanvas.clientHeight
-          gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight)
-        }
-
         // 清理画布
         gl.clearColor(0, 0, 0, 1)
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
         // 开始绘制图形
         gl.drawArrays(gl.LINE_LOOP, 0, 4)
-
-        requestAnimationFrame(draw)
       }
 
       draw()

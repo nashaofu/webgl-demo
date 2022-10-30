@@ -19,14 +19,25 @@
         width: 100%;
         height: 100%;
       }
+
+      #block {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 100px;
+        height: 100px;
+        background-color: blue;
+      }
     </style>
   </head>
   <body>
     <canvas id="glcanvas"></canvas>
+    <div id="block"></div>
     <script type="module">
-      import { createProgram, setAttribute } from '../common/utils.js'
+      import { createProgram, setAttribute, setUniform } from '../../common/utils.js'
 
       const $glcanvas = document.querySelector('#glcanvas')
+
       // 初始化 WebGL 上下文
       const gl = $glcanvas.getContext('webgl')
 
@@ -41,13 +52,13 @@
         // 正方形的顶点坐标
         data: new Float32Array([
           // 第一个点
-          -0.5, -0.5,
+          0, 0,
           // 第二个点
-          -0.5, 0.5,
+          0, 100,
           // 第三个点
-          0.5, 0.5,
+          100, 100,
           // 第四个点
-          0.5, -0.5
+          100, 0
         ]),
         size: 2,
         normalized: false,
@@ -56,12 +67,40 @@
       })
 
       function draw() {
+        if ($glcanvas.width !== $glcanvas.clientWidth || $glcanvas.height !== $glcanvas.clientHeight) {
+          $glcanvas.width = $glcanvas.clientWidth
+          $glcanvas.height = $glcanvas.clientHeight
+          gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight)
+        }
+
+        // 裁剪空间单位1的宽度对应 $glcanvas.clientWidth / 2 这么多个像素点(-1~+1 对应 $glcanvas.clientWidth)
+        const scale =  1 / ($glcanvas.clientWidth / 2)
+        const scaleX = scale
+        // 以宽度方向为基准，对高度方向进行缩放，以保证宽高方向绘制出来的实际像素值相同
+        const scaleY = gl.drawingBufferWidth / gl.drawingBufferHeight * scaleX
+
+        setUniform(gl, program, {
+          name: 'u_m4fv_scale',
+          data: [
+            //
+            scaleX, 0, 0 ,0,
+            //
+            0, scaleY, 0, 0,
+            //
+            0, 0, 1, 0,
+            //
+            0, 0, 0, 1
+          ]
+        })
+
         // 清理画布
         gl.clearColor(0, 0, 0, 1)
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
         // 开始绘制图形
         gl.drawArrays(gl.LINE_LOOP, 0, 4)
+
+        requestAnimationFrame(draw)
       }
 
       draw()
