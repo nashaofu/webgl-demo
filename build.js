@@ -2,11 +2,15 @@ const path = require('path')
 const fs = require('fs-extra')
 
 const regExp = /^\d+\.\s/
-const mdPath = path.join(__dirname, 'index.md')
+const distDir = path.join(__dirname, 'dist')
 
 // 编译首页
-async function buildIndexMd(mdFiles) {
-  const mdContent = await fs.readFile(path.join(__dirname, 'README.md'))
+async function buildHome(mdFiles) {
+  const sourcePath = path.join(__dirname, 'README.md')
+  const outputPath = path.join(distDir, 'index.md')
+
+  const mdContent = await fs.readFile(sourcePath)
+
   const mdLinks = mdFiles.map(file => {
     return `- [${file}](${encodeURIComponent(file)})`
   })
@@ -25,29 +29,49 @@ ${mdContent}
 
 ${mdLinks.join('\n')}
 `
-  await fs.writeFile(mdPath, mdText)
+  await fs.outputFile(outputPath, mdText)
 }
 
-async function buildDemoMd(file) {
-  const fullPath = path.join(__dirname, file, 'README.md')
+/**
+ * 编译章节
+ * @param {*} file
+ */
+async function buildChapter(file) {
+  const sourceDir = path.join(__dirname, file)
+  const outputPath = path.join(distDir, file)
+
+  await fs.copy(sourceDir, outputPath, {
+    recursive: true
+  })
+
+  const fullPath = path.join(sourceDir, 'README.md')
   const mdContent = await fs.readFile(fullPath)
+  await fs.remove(path.join(outputPath, 'README.md'))
 
   const mdText = `---
 layout: default
-title: ${file}
+title: ${file.split('.')[1]}
 nav_order: ${file.split('.')[0]}
-permalink: /${encodeURIComponent(file)}
+permalink: /${encodeURIComponent(file)}/
 ---
 
 ${mdContent}
 `
-  await fs.writeFile(path.join(__dirname, file, 'index.md'), mdText)
+
+  await fs.outputFile(path.join(outputPath, 'index.md'), mdText)
 }
 
-fs.readdir(__dirname).then(async files => {
-  const mdFiles = files.filter(file => regExp.test(file))
+fs.remove(distDir)
+  .then(() => fs.readdir(__dirname))
+  .then(async files => {
+    const mdFiles = files.filter(file => regExp.test(file))
 
-  await buildIndexMd(mdFiles)
-
-  await Promise.all(mdFiles.map(buildDemoMd))
-})
+    // 编译首页
+    await buildHome(mdFiles)
+    await Promise.all(mdFiles.map(buildChapter))
+  })
+  .then(async () => {
+    await fs.copy(path.join(__dirname, 'common'), path.join(distDir, 'common'))
+    await fs.copy(path.join(__dirname, '_includes'), path.join(distDir, '_includes'))
+    await fs.copy(path.join(__dirname, '_config.yml'), path.join(distDir, '_config.yml'))
+  })
