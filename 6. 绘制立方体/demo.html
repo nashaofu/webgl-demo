@@ -16,6 +16,10 @@
       绕 y 轴旋转角度
       <input type="range" id="yRad" min="0" max="360" value="0" step="1" />
     </div>
+    <div>
+      沿着 Z 轴移动
+      <input type="range" id="z" min="-2" max="2" value="0" step="0.1" />
+    </div>
     <script type="module">
       import { createProgram, setAttribute, setUniform } from '../common/utils.js'
 
@@ -34,20 +38,20 @@
         // 立方体各个面的顶点
         data: new Float32Array([
           // 前面
-          -0.5, -0.5, 0.5,
-          0.5, -0.5, 0.5,
-          0.5, 0.5, 0.5,
-          -0.5, 0.5, 0.5,
-          -0.5, -0.5, 0.5,
-          0.5, 0.5, 0.5,
-
-          // 后面
           -0.5, -0.5, -0.5,
           -0.5, 0.5, -0.5,
           0.5, 0.5, -0.5,
           0.5, -0.5, -0.5,
           -0.5, -0.5, -0.5,
           0.5, 0.5, -0.5,
+
+          // 后面
+          -0.5, -0.5, 0.5,
+          0.5, -0.5, 0.5,
+          0.5, 0.5, 0.5,
+          -0.5, 0.5, 0.5,
+          -0.5, -0.5, 0.5,
+          0.5, 0.5, 0.5,
 
           // 顶部
           -0.5, 0.5, -0.5,
@@ -111,6 +115,7 @@
 
       let xRad = 0
       let yRad = 0
+      let z = 0
 
       function draw() {
         let xSin = Math.sin(xRad);
@@ -139,6 +144,16 @@
           ]
         })
 
+        setUniform(gl, program, {
+          name: 'u_m4fv_transform_z',
+          data: [
+            1, 0, 0 ,0,
+            0, 1, 0, 0,
+            0, 0, 1, 0,
+            0, 0, z, 1
+          ]
+        })
+
         // 清理画布
         gl.clearColor(0, 0, 0, 1)
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
@@ -156,6 +171,10 @@
 
       document.querySelector('#yRad').addEventListener('input', (e) => {
         yRad = Number(e.target.value) / 180 * Math.PI;
+      })
+
+      document.querySelector('#z').addEventListener('input', (e) => {
+        z = Number(e.target.value)
       })
 
       draw()
