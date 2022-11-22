@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "在线示例: https://nashaofu.github.io/webgl-demo。",
   "scripts": {
+    "start": "estatic .",
     "dev": "tsc -w",
     "build": "tsc && node build.js"
   },
@@ -21,6 +22,7 @@
   },
   "homepage": "https://github.com/nashaofu/webgl-demo#readme",
   "devDependencies": {
+    "estatic": "^0.4.4",
     "fs-extra": "^10.1.0",
     "typescript": "^4.8.2"
   }
