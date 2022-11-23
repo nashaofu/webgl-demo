@@ -1,6 +1,6 @@
 # 绘制三维字母 F
 
-在 WebGL 中绘制一个立体的字母 F，并且把像素空间与裁剪空间进行转换，同时实现三维的移动与旋转。
+在 WebGL 中绘制一个立体的字母 F，每一个面使用不同颜色，方便观测，并且把像素空间与裁剪空间进行转换，同时实现三维的移动与旋转。
 
 至于为什么要绘制字母 F，原因如下：
 ![F](./F.png)
@@ -11,18 +11,24 @@
 
 ```glsl
 attribute vec4 a_f_position;
+attribute vec4 a_ub_color;
 uniform mat4 u_m4fv_transform;
+varying vec4 v_color;
 
 void main() {
   gl_Position = u_m4fv_transform * a_f_position;
+  v_color = a_ub_color;
 }
 ```
 
 - 片段着色器
 
 ```glsl
+precision mediump float;
+varying vec4 v_color;
+
 void main() {
-  gl_FragColor = vec4(0.0, 0.8, 1.0, 1.0);
+  gl_FragColor = v_color;
 }
 ```
 
@@ -30,7 +36,7 @@ void main() {
 
 ## js 代码
 
-在 JS 代码中，我们指定了字母 F 相关顶点的坐标，具体坐标值可到[源码](./vert.js)中查看
+在 JS 代码中，我们指定了字母 F 相关顶点的坐标与颜色，具体坐标值可到[vert.js](./vert.js)与[color.js](./color.js)中查看，特别的，在设置颜色的时候，由于`color.js`种的颜色值是`0~255`，所以需要对数据进行归一化处理，缓冲存储的数据类型也不再是`Float32Array`
 
 ```js
 setAttribute(gl, program, {
@@ -41,6 +47,13 @@ setAttribute(gl, program, {
   normalized: false,
   stride: 0,
   offset: 0
+})
+
+setAttribute(gl, program, {
+  name: 'a_ub_color',
+  data: new Uint16Array(color), // 值的范围是0~255，所以需要用Uint8
+  size: 3,
+  normalized: true // 由于颜色值是0~255,所以这里需制定要归一化处理
 })
 ```
 
@@ -60,9 +73,9 @@ function draw() {
    * 实现像素空间与裁剪空间的变换
    * x方向：-1~+1 对应的像素空间为 -$glcanvas.clientWidth / 2 ~ +$glcanvas.clientWidth / 2
    * y方向：-1~+1 对应的像素空间为 -$glcanvas.clientHeight / 2 ~ +$glcanvas.clientHeight / 2
-   * z方向：-1~+1 对应的像素空间为 -50 ~ +50
+   * z方向：-1~+1 对应的像素空间为 -150 ~ +150
    */
-  m = project(m, $glcanvas.clientWidth, $glcanvas.clientHeight, 100)
+  m = scale(m, 2 / $glcanvas.clientWidth, 2 / $glcanvas.clientHeight, 2 / 300)
   m = translate(m, x, y, z)
   m = xRotate(m, xRad)
   m = yRotate(m, yRad)
@@ -76,19 +89,13 @@ function draw() {
   // 清理画布
   gl.clearColor(0, 0, 0, 1)
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+  // 开启深度缓存
+  gl.enable(gl.DEPTH_TEST)
 
   // 开始绘制图形
   gl.drawArrays(gl.TRIANGLES, 0, 96)
 
   requestAnimationFrame(draw)
-}
-```
-
-`project`方法实际执行了一次缩放，代码如下：
-
-```ts
-export function project(m: number[], width: number, height: number, depth: number) {
-  return scale(m, 2 / width, 2 / height, 2 / depth)
 }
 ```
 

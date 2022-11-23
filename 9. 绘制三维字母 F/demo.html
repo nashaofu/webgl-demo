@@ -46,7 +46,7 @@
       </div>
       <div>
         沿着 Z 轴移动
-        <input type="range" id="z" min="-100" max="100" value="0" step="1" />
+        <input type="range" id="z" min="-200" max="200" value="0" step="1" />
       </div>
       <div>
         绕 X 轴旋转角度
@@ -63,8 +63,9 @@
     </div>
     <script type="module">
       import { createProgram, setAttribute, setUniform } from '../../common/utils.js'
-      import { project, translate, xRotate, yRotate, zRotate } from '../../common/m4.js'
+      import { scale, translate, xRotate, yRotate, zRotate } from '../../common/m4.js'
       import vert from './vert.js'
+      import color from './color.js'
 
       const $glcanvas = document.querySelector('#glcanvas')
 
@@ -87,6 +88,13 @@
         offset: 0
       })
 
+      setAttribute(gl, program, {
+        name: 'a_ub_color',
+        data: new Uint8Array(color),
+        size: 3,
+        normalized: true
+      })
+
       let x = 0
       let y = 0
       let z = 0
@@ -107,9 +115,9 @@
          * 实现像素空间与裁剪空间的变换
          * x方向：-1~+1 对应的像素空间为 -$glcanvas.clientWidth / 2 ~ +$glcanvas.clientWidth / 2
          * y方向：-1~+1 对应的像素空间为 -$glcanvas.clientHeight / 2 ~ +$glcanvas.clientHeight / 2
-         * z方向：-1~+1 对应的像素空间为 -50 ~ +50
+         * z方向：-1~+1 对应的像素空间为 -150 ~ +150
          */
-        m = project(m, $glcanvas.clientWidth, $glcanvas.clientHeight, 100)
+        m = scale(m, 2 / $glcanvas.clientWidth, 2 / $glcanvas.clientHeight, 2 / 300)
         m = translate(m, x, y, z)
         m = xRotate(m, xRad)
         m = yRotate(m, yRad)
@@ -123,6 +131,7 @@
         // 清理画布
         gl.clearColor(0, 0, 0, 1)
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+        gl.enable(gl.DEPTH_TEST)
 
         // 开始绘制图形
         gl.drawArrays(gl.TRIANGLES, 0, 96)

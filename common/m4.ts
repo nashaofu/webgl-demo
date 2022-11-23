@@ -102,10 +102,3 @@ export function scaling(sx: number, sy: number, sz: number) {
 export function scale(m: number[], sx: number, sy: number, sz: number) {
   return multiply(m, scaling(sx, sy, sz))
 }
-
-/**
- * 裁剪空间转换到像素空间
- */
-export function project(m: number[], width: number, height: number, depth: number) {
-  return scale(m, 2 / width, 2 / height, 2 / depth)
-}
