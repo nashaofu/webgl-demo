@@ -54,33 +54,53 @@ export function multiply(a: number[], b: number[]) {
   return dst
 }
 
+export function translation(tx: number, ty: number, tz: number) {
+  return [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, tx, ty, tz, 1]
+}
+
 export function translate(m: number[], tx: number, ty: number, tz: number) {
-  return multiply(m, [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, tx, ty, tz, 1])
+  return multiply(m, translation(tx, ty, tz))
+}
+
+export function xRotation(rad: number) {
+  const sin = Math.sin(rad)
+  const cos = Math.cos(rad)
+
+  return [1, 0, 0, 0, 0, cos, sin, 0, 0, -sin, cos, 0, 0, 0, 0, 1]
 }
 
 export function xRotate(m: number[], rad: number) {
+  return multiply(m, xRotation(rad))
+}
+
+export function yRotation(rad: number) {
   const sin = Math.sin(rad)
   const cos = Math.cos(rad)
 
-  return multiply(m, [1, 0, 0, 0, 0, cos, sin, 0, 0, -sin, cos, 0, 0, 0, 0, 1])
+  return [cos, 0, -sin, 0, 0, 1, 0, 0, sin, 0, cos, 0, 0, 0, 0, 1]
 }
 
 export function yRotate(m: number[], rad: number) {
+  return multiply(m, yRotation(rad))
+}
+
+export function zRotation(rad: number) {
   const sin = Math.sin(rad)
   const cos = Math.cos(rad)
 
-  return multiply(m, [cos, 0, -sin, 0, 0, 1, 0, 0, sin, 0, cos, 0, 0, 0, 0, 1])
+  return [cos, sin, 0, 0, -sin, cos, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
 }
 
 export function zRotate(m: number[], rad: number) {
-  const sin = Math.sin(rad)
-  const cos = Math.cos(rad)
+  return multiply(m, zRotation(rad))
+}
 
-  return multiply(m, [cos, sin, 0, 0, -sin, cos, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1])
+export function scaling(sx: number, sy: number, sz: number) {
+  return [sx, 0, 0, 0, 0, sy, 0, 0, 0, 0, sz, 0, 0, 0, 0, 1]
 }
 
 export function scale(m: number[], sx: number, sy: number, sz: number) {
-  return multiply(m, [sx, 0, 0, 0, 0, sy, 0, 0, 0, 0, sz, 0, 0, 0, 0, 1])
+  return multiply(m, scaling(sx, sy, sz))
 }
 
 /**

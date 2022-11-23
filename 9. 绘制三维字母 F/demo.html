@@ -101,8 +101,14 @@
           gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight)
         }
 
+        // 单位矩阵
         let m = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
-
+        /**
+         * 实现像素空间与裁剪空间的变换
+         * x方向：-1~+1 对应的像素空间为 -$glcanvas.clientWidth / 2 ~ +$glcanvas.clientWidth / 2
+         * y方向：-1~+1 对应的像素空间为 -$glcanvas.clientHeight / 2 ~ +$glcanvas.clientHeight / 2
+         * z方向：-1~+1 对应的像素空间为 -50 ~ +50
+         */
         m = project(m, $glcanvas.clientWidth, $glcanvas.clientHeight, 100)
         m = translate(m, x, y, z)
         m = xRotate(m, xRad)
