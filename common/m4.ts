@@ -102,3 +102,57 @@ export function scaling(sx: number, sy: number, sz: number) {
 export function scale(m: number[], sx: number, sy: number, sz: number) {
   return multiply(m, scaling(sx, sy, sz))
 }
+
+export function orthographicProjection(
+  left: number,
+  right: number,
+  bottom: number,
+  top: number,
+  near: number,
+  far: number
+) {
+  return [
+    2 / (right - left),
+    0,
+    0,
+    0,
+    0,
+    2 / (top - bottom),
+    0,
+    0,
+    0,
+    0,
+    2 / (near - far),
+    0,
+
+    (left + right) / (left - right),
+    (bottom + top) / (bottom - top),
+    (near + far) / (near - far),
+    1
+  ]
+}
+
+// 正交投影
+export function orthographic(
+  m: number[],
+  left: number,
+  right: number,
+  bottom: number,
+  top: number,
+  near: number,
+  far: number
+) {
+  return multiply(m, orthographicProjection(left, right, bottom, top, near, far))
+}
+
+export function perspectiveProjection(rad: number, aspect: number, near: number, far: number) {
+  const f = Math.tan(Math.PI * 0.5 - 0.5 * rad)
+  const rangeInv = 1.0 / (near - far)
+
+  return [f / aspect, 0, 0, 0, 0, f, 0, 0, 0, 0, (near + far) * rangeInv, -1, 0, 0, near * far * rangeInv * 2, 0]
+}
+
+// 透视投影
+export function perspective(m: number[], rad: number, aspect: number, near: number, far: number) {
+  return multiply(m, perspectiveProjection(rad, aspect, near, far))
+}
