@@ -145,14 +145,14 @@ export function orthographic(
   return multiply(m, orthographicProjection(left, right, bottom, top, near, far))
 }
 
-export function perspectiveProjection(rad: number, aspect: number, near: number, far: number) {
-  const f = Math.tan(Math.PI * 0.5 - 0.5 * rad)
+export function perspectiveProjection(fov: number, aspect: number, near: number, far: number) {
+  const f = Math.tan(Math.PI * 0.5 - 0.5 * fov)
   const rangeInv = 1.0 / (near - far)
 
   return [f / aspect, 0, 0, 0, 0, f, 0, 0, 0, 0, (near + far) * rangeInv, -1, 0, 0, near * far * rangeInv * 2, 0]
 }
 
 // 透视投影
-export function perspective(m: number[], rad: number, aspect: number, near: number, far: number) {
-  return multiply(m, perspectiveProjection(rad, aspect, near, far))
+export function perspective(m: number[], fov: number, aspect: number, near: number, far: number) {
+  return multiply(m, perspectiveProjection(fov, aspect, near, far))
 }
