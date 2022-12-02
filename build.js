@@ -64,7 +64,11 @@ ${mdContent}
 fs.remove(distDir)
   .then(() => fs.readdir(__dirname))
   .then(async files => {
-    const mdFiles = files.filter(file => regExp.test(file))
+    const mdFiles = files
+      .filter(file => regExp.test(file))
+      .sort((a, b) => {
+        return a.split('.')[0] - b.split('.')[0]
+      })
 
     // 编译首页
     await buildHome(mdFiles)
