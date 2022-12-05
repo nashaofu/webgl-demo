@@ -24,7 +24,7 @@
         position: absolute;
         top: 10px;
         right: 10px;
-        color: #fff;
+        color: #333;
         text-align: right;
       }
 
@@ -37,10 +37,6 @@
     <canvas id="glcanvas"></canvas>
     <div class="toolbar">
       <div>
-        视椎范围
-        <input type="range" value="60" id="f" min="0" max="180" value="0" step="1" />
-      </div>
-      <div>
         沿着 X 轴移动
         <input type="range" id="x" min="-100" max="100" value="0" step="1" />
       </div>
@@ -50,7 +46,7 @@
       </div>
       <div>
         沿着 Z 轴移动
-        <input type="range" value="-200" id="z" min="-1500" max="-200" value="0" step="1" />
+        <input type="range" id="z" min="-200" max="200" value="0" step="1" />
       </div>
       <div>
         绕 X 轴旋转角度
@@ -67,9 +63,10 @@
     </div>
     <script type="module">
       import { createProgram, setAttribute, setUniform } from '../../common/utils.js'
-      import { perspective, scale, translate, xRotate, yRotate, zRotate } from '../../common/m4.js'
+      import { scale, translate, xRotate, yRotate, zRotate } from '../../common/m4.js'
       import vert from '../../common/FVert.js'
       import color from '../../common/FColor.js'
+      import normal from '../../common/FNormal.js'
 
       const $glcanvas = document.querySelector('#glcanvas')
 
@@ -99,10 +96,16 @@
         normalized: true
       })
 
-      let f = 60
+      setAttribute(gl, program, {
+        name: 'a_f_normal',
+        data: new Float32Array(normal),
+        size: 3,
+        normalized: false
+      })
+
       let x = 0
       let y = 0
-      let z = -200
+      let z = 0
       let xRad = 0
       let yRad = 0
       let zRad = 0
@@ -116,10 +119,13 @@
 
         // 单位矩阵
         let m = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
-        const aspect = $glcanvas.width / $glcanvas.height;
-        const zNear = 1;
-        const zFar = 2000;
-        m = perspective(m, f / 180 * Math.PI, aspect, zNear, zFar);
+        /**
+         * 实现像素空间与裁剪空间的变换
+         * x方向：-1~+1 对应的像素空间为 -$glcanvas.clientWidth / 2 ~ +$glcanvas.clientWidth / 2
+         * y方向：-1~+1 对应的像素空间为 -$glcanvas.clientHeight / 2 ~ +$glcanvas.clientHeight / 2
+         * z方向：-1~+1 对应的像素空间为 -300 ~ +300
+         */
+        m = scale(m, 2 / $glcanvas.clientWidth, 2 / $glcanvas.clientHeight, 2 / 600)
         m = translate(m, x, y, z)
         m = xRotate(m, xRad)
         m = yRotate(m, yRad)
@@ -131,7 +137,7 @@
         })
 
         // 清理画布
-        gl.clearColor(0, 0, 0, 1)
+        gl.clearColor(1, 1, 1, 1)
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
         gl.enable(gl.DEPTH_TEST)
 
@@ -140,10 +146,6 @@
 
         requestAnimationFrame(draw)
       }
-
-      document.querySelector('#f').addEventListener('input', e => {
-        f = Number(e.target.value)
-      })
 
       document.querySelector('#x').addEventListener('input', e => {
         x = Number(e.target.value)
