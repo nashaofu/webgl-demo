@@ -6,131 +6,147 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>webgl</title>
     <style>
-      html,
-      body {
-        margin: 0;
-        padding: 0;
-        width: 100%;
-        height: 100%;
-      }
-
-      #glcanvas {
-        display: block;
-        width: 100%;
-        height: 100%;
-      }
-
-      .toolbar {
-        position: absolute;
-        top: 10px;
-        right: 10px;
-        color: #333;
-        text-align: right;
-      }
-
       input[type='range'] {
         width: 100px;
       }
     </style>
   </head>
   <body>
-    <canvas id="glcanvas"></canvas>
-    <div class="toolbar">
-      <div>
-        沿着 X 轴移动
-        <input type="range" id="x" min="-100" max="100" value="0" step="1" />
-      </div>
-      <div>
-        沿着 Y 轴移动
-        <input type="range" id="y" min="-100" max="100" value="0" step="1" />
-      </div>
-      <div>
-        沿着 Z 轴移动
-        <input type="range" id="z" min="-200" max="200" value="0" step="1" />
-      </div>
+    <canvas id="glcanvas" width="768" height="768"></canvas>
+    <div>
       <div>
         绕 X 轴旋转角度
-        <input type="range" id="xRad" min="0" max="360" value="0" step="1" />
+        <input type="range" id="xRad" min="0" max="360" value="315" step="1" />
       </div>
       <div>
         绕 Y 轴旋转角度
-        <input type="range" id="yRad" min="0" max="360" value="0" step="1" />
+        <input type="range" id="yRad" min="0" max="360" value="45" step="1" />
       </div>
       <div>
         绕 Z 轴旋转角度
         <input type="range" id="zRad" min="0" max="360" value="0" step="1" />
       </div>
     </div>
+
     <script type="module">
       import { createProgram, setAttribute, setUniform } from '../../common/utils.js'
-      import { scale, translate, xRotate, yRotate, zRotate } from '../../common/m4.js'
-      import vert from '../../common/FVert.js'
-      import color from '../../common/FColor.js'
-      import normal from '../../common/FNormal.js'
-
-      const $glcanvas = document.querySelector('#glcanvas')
-
-      // 初始化 WebGL 上下文
-      const gl = $glcanvas.getContext('webgl')
+      import { xRotate, yRotate, zRotate } from '../../common/m4.js'
 
       // Vertex shader program
-      const vsSource = await fetch('./shader.vert').then(r => r.text())
-      const fsSource = await fetch('./shader.frag').then(r => r.text())
+      const vsSource = await fetch('./shader.vert').then(res => res.text())
+      const fsSource = await fetch('./shader.frag').then(res => res.text())
+
+      const $glcanvas = document.querySelector('#glcanvas')
+      // 初始化 WebGL 上下文
+      const gl = $glcanvas.getContext('webgl')
 
       let program = createProgram(gl, vsSource, fsSource)
 
       setAttribute(gl, program, {
-        name: 'a_f_position',
-        // 正方形的顶点坐标
-        data: new Float32Array(vert),
-        size: 3,
-        normalized: false,
-        stride: 0,
-        offset: 0
+        name: 'a_f_postion',
+        data: new Float32Array([
+          // 前面
+          -0.5, -0.5, -0.5,
+          -0.5, 0.5, -0.5,
+          0.5, 0.5, -0.5,
+          -0.5, -0.5, -0.5,
+          0.5, 0.5, -0.5,
+          0.5, -0.5, -0.5,
+
+          // 后面
+          -0.5, -0.5, 0.5,
+          -0.5, 0.5, 0.5,
+          0.5, 0.5, 0.5,
+          -0.5, -0.5, 0.5,
+          0.5, 0.5, 0.5,
+          0.5, -0.5, 0.5,
+
+          // 左边
+          -0.5, -0.5, -0.5,
+          -0.5, 0.5, -0.5,
+          -0.5, 0.5, 0.5,
+          -0.5, -0.5, -0.5,
+          -0.5, 0.5, 0.5,
+          -0.5, -0.5, 0.5,
+
+          // 右边
+          0.5, -0.5, -0.5,
+          0.5, 0.5, -0.5,
+          0.5, 0.5, 0.5,
+          0.5, -0.5, -0.5,
+          0.5, 0.5, 0.5,
+          0.5, -0.5, 0.5,
+
+          // 顶部
+          -0.5, 0.5, -0.5,
+          -0.5, 0.5, 0.5,
+          0.5, 0.5, 0.5,
+          -0.5, 0.5, -0.5,
+          0.5, 0.5, 0.5,
+          0.5, 0.5, -0.5,
+
+          // 底部
+          -0.5, -0.5, -0.5,
+          -0.5, -0.5, 0.5,
+          0.5, -0.5, 0.5,
+          -0.5, -0.5, -0.5,
+          0.5, -0.5, 0.5,
+          0.5, -0.5, -0.5
+        ]),
+        size: 3
       })
 
       setAttribute(gl, program, {
         name: 'a_ub_color',
-        data: new Uint8Array(color),
+        data: new Uint8Array([
+            // 前面
+            Array(6).fill([0, 0, 255]).flat(1),
+            // 后面
+            Array(6).fill([0, 255, 0]).flat(1),
+            // 左侧
+            Array(6).fill([255, 0, 0]).flat(1),
+            // 右侧
+            Array(6).fill([0, 255, 255]).flat(1),
+            // 顶部
+            Array(6).fill([255, 0, 255]).flat(1),
+            // 底部
+            Array(6).fill([255, 255, 0]).flat(1)
+          ].flat(1)
+        ),
         size: 3,
         normalized: true
       })
 
       setAttribute(gl, program, {
         name: 'a_f_normal',
-        data: new Float32Array(normal),
-        size: 3,
-        normalized: false
+        data: new Float32Array(
+          [
+            // 前面法向量
+            Array(6).fill([0, 0, -1]).flat(1),
+            // 后面法向量
+            Array(6).fill([0, 0, 1]).flat(1),
+            // 左侧
+            Array(6).fill([-1, 0, 0]).flat(1),
+            // 右侧
+            Array(6).fill([1, 0, 0]).flat(1),
+            // 顶部
+            Array(6).fill([0, 1, 0]).flat(1),
+            // 底部
+            Array(6).fill([0, -1, 0]).flat(1)
+          ].flat(1)
+        ),
+        size: 3
       })
 
-      let x = 0
-      let y = 0
-      let z = 0
-      let xRad = 0
-      let yRad = 0
+      let xRad = 315 / 180 * Math.PI
+      let yRad = 45 / 180 * Math.PI
       let zRad = 0
-
       function draw() {
-        if ($glcanvas.width !== $glcanvas.clientWidth || $glcanvas.height !== $glcanvas.clientHeight) {
-          $glcanvas.width = $glcanvas.clientWidth
-          $glcanvas.height = $glcanvas.clientHeight
-          gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight)
-        }
-
         // 单位矩阵
         let m = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
-        /**
-         * 实现像素空间与裁剪空间的变换
-         * x方向：-1~+1 对应的像素空间为 -$glcanvas.clientWidth / 2 ~ +$glcanvas.clientWidth / 2
-         * y方向：-1~+1 对应的像素空间为 -$glcanvas.clientHeight / 2 ~ +$glcanvas.clientHeight / 2
-         * z方向：-1~+1 对应的像素空间为 -300 ~ +300
-         */
-        m = scale(m, 2 / $glcanvas.clientWidth, 2 / $glcanvas.clientHeight, 2 / 600)
-        m = translate(m, x, y, z)
         m = xRotate(m, xRad)
         m = yRotate(m, yRad)
         m = zRotate(m, zRad)
-
         setUniform(gl, program, {
           name: 'u_m4fv_transform',
           data: m
@@ -141,37 +157,25 @@
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
         gl.enable(gl.DEPTH_TEST)
 
-        // 开始绘制图形
-        gl.drawArrays(gl.TRIANGLES, 0, 96)
-
+        //开始绘制图形
+        gl.drawArrays(gl.TRIANGLES, 0, 36)
         requestAnimationFrame(draw)
       }
 
-      document.querySelector('#x').addEventListener('input', e => {
-        x = Number(e.target.value)
-      })
-
-      document.querySelector('#y').addEventListener('input', e => {
-        y = Number(e.target.value)
-      })
-
-      document.querySelector('#z').addEventListener('input', e => {
-        z = Number(e.target.value)
-      })
+      draw()
 
       document.querySelector('#xRad').addEventListener('input', e => {
         xRad = (Number(e.target.value) / 180) * Math.PI
       })
 
       document.querySelector('#yRad').addEventListener('input', e => {
+        console.log(e.target.value)
         yRad = (Number(e.target.value) / 180) * Math.PI
       })
 
       document.querySelector('#zRad').addEventListener('input', e => {
         zRad = (Number(e.target.value) / 180) * Math.PI
       })
-
-      draw()
     </script>
   </body>
 </html>
