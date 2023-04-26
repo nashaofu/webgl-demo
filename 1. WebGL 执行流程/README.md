@@ -6,6 +6,10 @@ WebGL 坐标原点默认在画布中间，且画布大小为`-1.0`到`1.0`之间
 
 ![坐标](./%E5%9D%90%E6%A0%87.png)
 
+MDN 裁剪空间说明：https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API/WebGL_model_view_projection#clip_space
+
+![clip_space](./clip_space_graph.svg)
+
 ## 执行流程
 
 WebGL 执行流程比较多，作为入门，可简单理解为：`初始化 WebGL 上下文 -> 编译着色器代码 -> 创建着色器程序-> 写入数据到缓冲区 -> 执行顶点着色器代码 -> 光栅化 -> 执行片段着色器 -> 绘制到画布上`。

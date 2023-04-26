@@ -8,25 +8,33 @@
   </head>
   <body>
     <canvas id="glcanvas" width="768" height="768"></canvas>
+    <script
+      src="https://greggman.github.io/webgl-lint/webgl-lint.js"
+      crossorigin
+    ></script>
     <div>
       绕 Z 轴旋转角度
       <input type="range" id="zRad" min="0" max="360" value="0" step="1" />
     </div>
     <script type="module">
-      import { createProgram, setAttribute, setUniform } from '../common/utils.js'
+      import {
+        createProgram,
+        setAttribute,
+        setUniform,
+      } from "../common/utils.js";
 
-      const $glcanvas = document.querySelector('#glcanvas')
+      const $glcanvas = document.querySelector("#glcanvas");
       // 初始化 WebGL 上下文
-      const gl = $glcanvas.getContext('webgl')
+      const gl = $glcanvas.getContext("webgl");
 
       // Vertex shader program
-      const vsSource = await fetch('./shader.vert').then(r => r.text())
-      const fsSource = await fetch('./shader.frag').then(r => r.text())
+      const vsSource = await fetch("./shader.vert").then((r) => r.text());
+      const fsSource = await fetch("./shader.frag").then((r) => r.text());
 
-      let program = createProgram(gl, vsSource, fsSource)
+      let program = createProgram(gl, vsSource, fsSource);
 
       setAttribute(gl, program, {
-        name: 'a_f_position',
+        name: "a_f_position",
         // 三角形的顶点坐标
         data: new Float32Array([
           // 第一个点
@@ -34,16 +42,16 @@
           // 第二个点
           0.5, 0,
           // 第三个点
-          0, 0.5
+          0, 0.5,
         ]),
         size: 2,
         normalized: false,
         stride: 0,
-        offset: 0
-      })
+        offset: 0,
+      });
 
       setAttribute(gl, program, {
-        name: 'a_f_color',
+        name: "a_f_color",
         // 三角形的各个顶点的颜色
         data: new Float32Array([
           // 第一个
@@ -51,44 +59,43 @@
           // 第二个点
           0, 1, 0,
           // 第三个点
-          0, 0, 1
+          0, 0, 1,
         ]),
         size: 3,
         normalized: false,
         stride: 0,
-        offset: 0
-      })
+        offset: 0,
+      });
 
-      let zRad = 0
+      let zRad = 0;
 
       function draw() {
-        let sin = Math.sin(zRad)
-        let cos = Math.cos(zRad)
+        let sin = Math.sin(zRad);
+        let cos = Math.cos(zRad);
         setUniform(gl, program, {
-          name: 'u_m4fv_transform_z',
+          name: "u_m4fv_transform_z",
           data: [
             // 绕 Z 轴旋转矩阵
             cos, sin, 0 ,0,
             -sin, cos, 0, 0,
             0, 0, 1, 0,
             0, 0, 0, 1
-          ]
-        })
+          ],
+        });
 
         // 清理画布
-        gl.clearColor(0, 0, 0, 1)
-        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+        gl.clearColor(0, 0, 0, 1);
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
         // 开始绘制图形
-        gl.drawArrays(gl.TRIANGLES, 0, 3)
-        requestAnimationFrame(draw)
+        gl.drawArrays(gl.TRIANGLES, 0, 3);
+        requestAnimationFrame(draw);
       }
 
-      document.querySelector('#zRad').addEventListener('input', (e) => {
-        zRad = Number(e.target.value) / 180 * Math.PI;
-      })
-      draw()
-
+      document.querySelector("#zRad").addEventListener("input", (e) => {
+        zRad = (Number(e.target.value) / 180) * Math.PI;
+      });
+      draw();
     </script>
   </body>
 </html>
