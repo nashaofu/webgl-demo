@@ -55,7 +55,7 @@ setAttribute(gl, program, {
 +        const scale =  1 / $glcanvas.clientWidth
 +        const scaleX = scale
 +        // 以宽度方向为基准，对高度方向进行缩放，以保证宽高方向绘制出来的实际像素值相同
-+        const scaleY = gl.drawingBufferWidth / gl.drawingBufferHeight * scaleX
++        const scaleY = $glcanvas.clientWidth / $glcanvas.clientHeight * scaleX
 
          setUniform(gl, program, {
            name: 'u_m4fv_scale',
@@ -74,14 +74,14 @@ setAttribute(gl, program, {
 setUniform(gl, program, {
   name: 'u_m4fv_scale',
   data: [
-    2 / gl.drawingBufferWidth, 0, 0, 0,
-    0, 2 / gl.drawingBufferHeight, 0, 0,
+    2 / $glcanvas.clientWidth, 0, 0, 0,
+    0, 2 / $glcanvas.clientHeight, 0, 0,
     0, 0, 1, 0,
     0, 0, 0, 1
   ]
 })
 ```
-这意味着，我们把`(-1~+1)`的空间转换到画布的尺寸上，对应像素空间坐标为`(-gl.drawingBufferWidth~+gl.drawingBufferWidth)`。这里实际就是缩放矩阵。
+这意味着，我们把`(-1~+1)`的空间转换到画布的尺寸上，对应像素空间坐标为`(-gl.clientWidth~+gl.clientHeight)`。这里实际就是缩放矩阵。
 
 ## 示例效果
 

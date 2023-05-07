@@ -64,11 +64,11 @@
         if ($glcanvas.width !== $glcanvas.clientWidth || $glcanvas.height !== $glcanvas.clientHeight) {
           $glcanvas.width = $glcanvas.clientWidth
           $glcanvas.height = $glcanvas.clientHeight
-          gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight)
+          gl.viewport(0, 0, $glcanvas.clientWidth, $glcanvas.clientHeight)
         }
 
         // 以宽度方向为基准，对高度方向进行缩放，以保证宽高方向绘制出来的实际像素值相同
-        const scaleY = gl.drawingBufferWidth / gl.drawingBufferHeight
+        const scaleY = $glcanvas.clientWidth / $glcanvas.clientHeight
         setUniform(gl, program, {
           name: 'u_m4fv_scale',
           data: [

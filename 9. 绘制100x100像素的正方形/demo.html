@@ -74,14 +74,14 @@
         if ($glcanvas.width !== $glcanvas.clientWidth || $glcanvas.height !== $glcanvas.clientHeight) {
           $glcanvas.width = $glcanvas.clientWidth
           $glcanvas.height = $glcanvas.clientHeight
-          gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight)
+          gl.viewport(0, 0, $glcanvas.clientWidth, $glcanvas.clientHeight)
         }
 
         // 裁剪空间单位1的宽度对应 $glcanvas.clientWidth / 2 这么多个像素点(-1~+1 对应 $glcanvas.clientWidth)
         const scale =  1 / ($glcanvas.clientWidth / 2)
         const scaleX = scale
         // 以宽度方向为基准，对高度方向进行缩放，以保证宽高方向绘制出来的实际像素值相同
-        const scaleY = gl.drawingBufferWidth / gl.drawingBufferHeight * scaleX
+        const scaleY = $glcanvas.clientWidth / $glcanvas.clientHeight * scaleX
 
         setUniform(gl, program, {
           name: 'u_m4fv_scale',
@@ -96,6 +96,16 @@
             0, 0, 0, 1
           ]
         })
+
+        // setUniform(gl, program, {
+        //   name: 'u_m4fv_scale',
+        //   data: [
+        //     2 / $glcanvas.clientWidth, 0, 0, 0,
+        //     0, 2 / $glcanvas.clientHeight, 0, 0,
+        //     0, 0, 1, 0,
+        //     0, 0, 0, 1
+        //   ]
+        // })
 
         // 清理画布
         gl.clearColor(0, 0, 0, 1)

@@ -2,13 +2,17 @@
 
 ## WebGL 坐标系
 
-WebGL 坐标原点默认在画布中间，且画布大小为`-1.0`到`1.0`之间，画布向右为 x 轴正方向，向上为 y 轴正方向，垂直画布向里为 z 轴正方向。可以到[Z 轴默认方向](../3.%20Z%20%E8%BD%B4%E9%BB%98%E8%AE%A4%E6%96%B9%E5%90%91/)中实际观察一下。
+在开始之前，我们先介绍一下 WebGL 的的坐标系，WebGL 坐标原点默认在画布中间，且画布大小为`-1.0`到`1.0`之间，画布向右为 x 轴正方向，向上为 y 轴正方向，垂直画布向里为 z 轴正方向。可以到[Z 轴默认方向](../3.%20Z%20%E8%BD%B4%E9%BB%98%E8%AE%A4%E6%96%B9%E5%90%91/)中实际观察一下。
 
 ![坐标](./%E5%9D%90%E6%A0%87.png)
 
 MDN 裁剪空间说明：https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API/WebGL_model_view_projection#clip_space
 
 ![clip_space](./clip_space_graph.svg)
+
+特别说明一下，网上常说的 WebGL 是右手坐标系，都是不太正确的，只是人们习惯使用右手坐标系描述三维空间，所以会改变默认的坐标系为右手坐标系，而未经修改的 WebGL 的坐标系默认为左手坐标系。
+
+![3D_Cartesian_Coodinate_Handedness](./3D_Cartesian_Coodinate_Handedness.jpg)
 
 ## 执行流程
 

@@ -4,7 +4,7 @@
 
 ## 画布尺寸
 
-每个画布都有两个尺寸，一个是绘制的`drawingBuffer`尺寸， 这个表示画布中有多少个像素。另一是画布显示的尺寸， CSS 决定画布显示的尺寸。
+每个画布都有两个尺寸，一个是绘制的`drawingBuffer`尺寸， 这个表示画布中有多少个像素。另一个是画布显示的尺寸， CSS 决定画布显示的尺寸。
 
 绘制尺寸可以通过 HTML 与 js 设置：
 
@@ -85,7 +85,7 @@ gl.viewport(0, 0, $glcanvas.clientWidth, $glcanvas.clientHeight)
 gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight)
 ```
 
-关于使用 `clientWidth/clientHeight`与`drawingBufferWidth/drawingBufferHeight` 的区别参考：https://webglfundamentals.org/webgl/lessons/zh_cn/webgl-anti-patterns.html#drawingbuffer，可按情况选择使用。
+关于使用`clientWidth/clientHeight`与`drawingBufferWidth/drawingBufferHeight`的区别参考：[drawingbuffer](https://webglfundamentals.org/webgl/lessons/zh_cn/webgl-anti-patterns.html#drawingbuffer)，可按情况选择使用。
 
 设置 viewport 后，打开[示例 2](./demo2)页面，改变窗口大小，可以看到正方形并不是正方形，只是边的粗细不会像[示例 1](./demo1)一样了。
 
@@ -96,7 +96,7 @@ gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight)
 
 ```js
 // 以宽度方向为基准，对高度方向进行缩放，以保证宽高方向绘制出来的实际像素值相同
-const scaleY = gl.drawingBufferWidth / gl.drawingBufferHeight
+const scaleY = $glcanvas.clientWidth / $glcanvas.clientHeight
 setUniform(gl, program, {
   name: 'u_m4fv_scale',
   data: [1, 0, 0, 0, 0, scaleY, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
@@ -115,6 +115,8 @@ void main() {
 ```
 
 实际运行效果：[示例 3](./demo3)
+
+这里我们可以看到实际运行时，x、y方向的比例保持了一致，随便怎么调整窗口大小，图形还是保持为正方形。
 
 ## 总结
 
