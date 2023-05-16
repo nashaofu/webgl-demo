@@ -8,8 +8,12 @@
   </head>
   <body>
     <canvas id="glcanvas" width="768" height="768"></canvas>
+    <script
+      src="https://greggman.github.io/webgl-lint/webgl-lint.js"
+      crossorigin
+    ></script>
     <script type="module">
-      import { createProgram, setAttribute, setUniform } from '../../common/utils.js'
+      import { createProgram, setAttribute, setUniform } from '../common/utils.js'
 
       // Vertex shader program
       const vsSource = await fetch('./shader.vert').then(res => res.text())
@@ -20,6 +24,38 @@
       const gl = $glcanvas.getContext('webgl')
 
       let program = createProgram(gl, vsSource, fsSource)
+
+      setAttribute(gl, program, {
+        name: "a_f_pos",
+        data: new Float32Array([
+          // 第0个点
+          -0.2, -0.2, 0.2,
+          // 第1个点
+          -0.2, 0.2, 0.2,
+          // 第2个点
+          0.2, 0.2, 0.2,
+          // 第3个点
+          0.2, -0.2, 0.2,
+          // 第4个点
+          -0.2, -0.2, -0.2,
+          // 第5个点
+          -0.2, 0.2, -0.2,
+          // 第6个点
+          0.2, 0.2, -0.2,
+          // 第7个点
+          0.2, -0.2, -0.2,
+        ]),
+        size: 3,
+        normalized: false,
+        stride: 0,
+        offset: 0,
+      });
+
+
+      setUniform(gl, program, {
+        name: 'u_4fv_color',
+        data: new Float32Array([1, 1, 0, 1])
+      })
 
       // 顶点索引数组
       const indexes = new Uint8Array([
@@ -39,52 +75,6 @@
         1, 2, 5, 2, 5, 6
       ])
 
-      setAttribute(gl, program, {
-        name: 'a_f_pos',
-        data: new Float32Array([
-          -0.2, -0.2, 0.2, -0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, -0.2, 0.2,
-
-          -0.2, -0.2, -0.2, -0.2, 0.2, -0.2, 0.2, 0.2, -0.2, 0.2, -0.2, -0.2
-        ]),
-        size: 3,
-        normalized: false,
-        stride: 0,
-        offset: 0
-      })
-
-
-      setUniform(gl, program, {
-        name: 'u_4fv_color',
-        data: new Float32Array([1, 1, 0, 1])
-      })
-
-      setAttribute(gl, program, {
-        name: 'a_f_normal',
-        data: new Float32Array([
-          // 前面法向量
-          0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0,
-
-          // 右侧法向量
-          1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0,
-
-          // 后面法向量
-          0.0, 0.0, -1.0, 0.0, 0.0, -1.0, 0.0, 0.0, -1.0, 0.0, 0.0, -1.0, 0.0, 0.0, -1.0, 0.0, 0.0, -1.0,
-
-          // 左侧
-          -1.0, 0.0, 0.0, -1.0, 0.0, 0.0, -1.0, 0.0, 0.0, -1.0, 0.0, 0.0, -1.0, 0.0, 0.0, -1.0, 0.0, 0.0,
-
-          // 底部
-          0.0, -1.0, 0.0, 0.0, -1.0, 0.0, 0.0, -1.0, 0.0, 0.0, -1.0, 0.0, 0.0, -1.0, 0.0, 0.0, -1.0, 0.0,
-
-          // 顶部
-          0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0
-        ]),
-        size: 3,
-        normalized: false,
-        stride: 0,
-        offset: 0
-      })
-
       // 创建缓冲区对象
       const indexesBuffer = gl.createBuffer()
       gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexesBuffer)
@@ -93,15 +83,19 @@
 
       let r = 0
       function draw() {
-        setAttribute(gl,program, {
-          name: 'a_f_angle',
-          data: new Float32Array(Array(16).fill(r / 360)),
-          size: 2,
-          normalized: false,
-          stride: 0,
-          offset: 0
-        })
-        r += 0.5
+        // 清理画布
+        gl.clearColor(0, 0, 0, 1)
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+
+        setUniform(gl, program, {
+          name: "u_2fv_angle",
+          data: [
+            r,
+            r,
+          ],
+        });
+
+        r += 1
         if (r > 360) {
           r -= 360
         }
@@ -116,8 +110,6 @@
           ],
         });
 
-        gl.clearColor(0, 0, 0, 1)
-        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
         //开始绘制图形
         gl.drawElements(gl.TRIANGLES, 36, gl.UNSIGNED_BYTE, 0)
 
