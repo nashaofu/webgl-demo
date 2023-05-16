@@ -8,7 +8,7 @@
 
 ```glsl
 attribute vec4 a_f_pos;
-uniform vec4 u_4fv_color;
+attribute vec4 a_f_color;
 varying vec4 v_color;
 
 uniform vec2 u_2fv_angle;	// 旋转角度
@@ -31,7 +31,7 @@ void main() {
 
   gl_Position = rotationXMatrix * rotationYMatrix * a_f_pos + u_4fv_transform_x;
 
-  v_color = u_4fv_color;
+  v_color = a_f_color;
 }
 
 ```
@@ -86,9 +86,30 @@ setAttribute(gl, program, {
   offset: 0,
 });
 
-setUniform(gl, program, {
-  name: "u_4fv_color",
-  data: new Float32Array([1, 1, 0, 1]),
+setAttribute(gl, program, {
+  name: "a_f_color",
+  data: new Float32Array([
+    // 第0个点
+    1, 1, 1,
+    // 第1个点
+    1, 1, 0,
+    // 第2个点
+    1, 0, 0,
+    // 第3个点
+    1, 0, 1,
+    // 第4个点
+    0, 1, 1,
+    // 第5个点
+    0, 0, 1,
+    // 第6个点
+    0, 1, 0,
+    // 第7个点
+    0, 0, 0,
+  ]),
+  size: 3,
+  normalized: false,
+  stride: 0,
+  offset: 0,
 });
 ```
 

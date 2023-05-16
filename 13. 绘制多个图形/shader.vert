@@ -1,5 +1,5 @@
 attribute vec4 a_f_pos;
-uniform vec4 u_4fv_color;
+attribute vec4 a_f_color;
 varying vec4 v_color;
 
 uniform vec2 u_2fv_angle;	// 旋转角度
@@ -22,5 +22,5 @@ void main() {
 
   gl_Position = rotationXMatrix * rotationYMatrix * a_f_pos + u_4fv_transform_x;
 
-  v_color = u_4fv_color;
+  v_color = a_f_color;
 }
